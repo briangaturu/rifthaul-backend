@@ -1,0 +1,226 @@
+@baseUrl = http://localhost:3000/api
+@token = REPLACE_WITH_TOKEN_AFTER_LOGIN
+
+### ───────────────────────────────────────
+### AUTH
+### ───────────────────────────────────────
+
+### Register a business
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "companyName": "Acme Supplies Ltd",
+  "email": "business@acme.com",
+  "password": "password123",
+  "phone": "0712345678",
+  "userType": "business"
+}
+
+### Register a transporter
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "James mwangi",
+  "email": "transporter@rifthaul.com",
+  "password": "password123",
+  "phone": "0798765432",
+  "userType": "transporter"
+}
+
+### Login (copy the returned token into @token above)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "business@acme.com",
+  "password": "newPassword456"
+}
+
+### Request password reset
+POST {{baseUrl}}/auth/password-reset
+Content-Type: application/json
+
+{
+  "email": "business@acme.com"
+}
+
+### Update password using reset token
+PUT {{baseUrl}}/auth/update/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4MTU5ODYzNiwiZXhwIjoxNzgxNjAyMjM2fQ.T-qI5fvn8MocoHbiz1ABJz4KUY_XtSbYaitt_HfIINs
+Content-Type: application/json
+
+{
+  "password": "newPassword456"
+}
+
+
+### ───────────────────────────────────────
+### USERS
+### ───────────────────────────────────────
+
+### Get user by id
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+### Get all transporters
+GET {{baseUrl}}/users/transporters
+Authorization: Bearer {{token}}
+
+### Get all businesses
+GET {{baseUrl}}/users/businesses
+Authorization: Bearer {{token}}
+
+### Update user profile
+PUT {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Jane Doe",
+  "phone": "0700000000"
+}
+
+### Delete user
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+
+### ───────────────────────────────────────
+### TRUCKS
+### ───────────────────────────────────────
+
+### Register a truck (transporter only)
+POST {{baseUrl}}/trucks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "truckType": "Flatbed",
+  "plateNumber": "KDG 412A",
+  "capacityTonnes": 20,
+  "location": "Nairobi"
+}
+
+### Get all trucks (public)
+GET {{baseUrl}}/trucks
+
+### Get all trucks filtered by location (public)
+GET {{baseUrl}}/trucks?location=Nairobi
+
+### Get my trucks (transporter only)
+GET {{baseUrl}}/trucks/mine
+Authorization: Bearer {{token}}
+
+### Get truck by id (public)
+GET {{baseUrl}}/trucks/1
+
+### Update truck details (transporter only)
+PUT {{baseUrl}}/trucks/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "location": "Mombasa",
+  "capacityTonnes": 22
+}
+
+### Update truck status (transporter only)
+PATCH {{baseUrl}}/trucks/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "on_job"
+}
+
+### Delete truck (transporter only)
+DELETE {{baseUrl}}/trucks/1
+Authorization: Bearer {{token}}
+
+
+### ───────────────────────────────────────
+### SHIPMENTS
+### ───────────────────────────────────────
+
+### Post a shipment (business only)
+POST {{baseUrl}}/shipments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "origin": "Nairobi",
+  "destination": "Mombasa",
+  "cargoType": "Building materials",
+  "weightTonnes": 10,
+  "budget": 45000,
+  "pickupDate": "2026-06-20T08:00:00.000Z"
+}
+
+### Get all shipments (public, optional search)
+GET {{baseUrl}}/shipments
+
+### Get all shipments with search filter (public)
+GET {{baseUrl}}/shipments?search=Mombasa
+
+### Get open shipments only (public, for transporters browsing marketplace)
+GET {{baseUrl}}/shipments/open
+
+### Get shipment by id (public)
+GET {{baseUrl}}/shipments/1
+
+### Get my shipments (business sees posted, transporter sees assigned)
+GET {{baseUrl}}/shipments/mine
+Authorization: Bearer {{token}}
+
+### Update shipment details (business only)
+PUT {{baseUrl}}/shipments/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "budget": 50000,
+  "pickupDate": "2026-06-22T08:00:00.000Z"
+}
+
+### Update shipment status — accept job (assign transporter + truck)
+PATCH {{baseUrl}}/shipments/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "accepted",
+  "transporterId": 2,
+  "truckId": 1
+}
+
+### Update shipment status — mark in transit
+PATCH {{baseUrl}}/shipments/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "in_transit"
+}
+
+### Update shipment status — mark delivered
+PATCH {{baseUrl}}/shipments/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "delivered"
+}
+
+### Update shipment status — cancel
+PATCH {{baseUrl}}/shipments/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "cancelled"
+}
+
+### Delete shipment (business only)
+DELETE {{baseUrl}}/shipments/1
+Authorization: Bearer {{token}}

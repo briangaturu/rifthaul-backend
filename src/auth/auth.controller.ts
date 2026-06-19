@@ -1,0 +1,144 @@
+import { Request, Response } from "express";
+import { createUserServices, getUserByEmailService, updateUserPasswordService } from "./auth.service";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { UserLoginValidator, UserValidator } from "../validation/validator";
+import { getUserByIdServices } from "../users/user.service";
+
+export const createUser = async (req: Request, res: Response) => {
+    try {
+        // Validate user input
+        const parseResult = UserValidator.safeParse(req.body);
+        if (!parseResult.success) {
+            res.status(400).json({ error: parseResult.error.issues });
+            return;
+        }
+        const user = parseResult.data;
+        const userEmail = user.email;
+
+        const existingUser = await getUserByEmailService(userEmail);
+        if (existingUser) {
+            res.status(400).json({ error: "User with this email already exists" });
+            return;
+        }
+
+        // Generate hashed password
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(user.password, salt);
+        user.password = hashedPassword;
+
+        // Call the service to create the user
+        const newUser = await createUserServices(user);
+
+        res.status(201).json({ message: newUser });
+
+    } catch (error: any) {
+        res.status(500).json({ error: error.message || "Failed to create user" });
+    }
+}
+
+// Login User
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+        const parseResult = UserLoginValidator.safeParse(req.body);
+        if (!parseResult.success) {
+            res.status(400).json({ error: parseResult.error.issues });
+            return;
+        }
+        const { email, password } = parseResult.data;
+
+        // Check if user exists
+        const user = await getUserByEmailService(email);
+        if (!user) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+
+        // Compare passwords
+        const isMatch = bcrypt.compareSync(password, user.password);
+        if (!isMatch) {
+            res.status(401).json({ error: "Invalid password" });
+            return;
+        }
+
+        // Generate a token
+        const payload = {
+            userId: user.userId,
+            email: user.email,
+            userType: user.userType,
+            exp: Math.floor(Date.now() / 1000) + (60 * 60) // Token expires in 1 hour
+        }
+
+        const secret = process.env.JWT_SECRET as string;
+        const token = jwt.sign(payload, secret);
+
+        res.status(200).json({ token, userId: user.userId, email: user.email, userType: user.userType });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message || "Failed to login user" });
+    }
+}
+
+// Password reset request
+export const passwordReset = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            res.status(400).json({ error: "Email is required" });
+            return;
+        }
+
+        const user = await getUserByEmailService(email);
+        if (!user) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+
+        // Generate a reset token
+        const secret = process.env.JWT_SECRET as string;
+        const resetToken = jwt.sign({ userId: user.userId }, secret, { expiresIn: '1h' });
+
+        // TODO: send reset email via notification service
+        res.status(200).json({ message: "Password reset token generated", resetToken });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message || "Failed to reset password" });
+    }
+}
+
+export const updatePassword = async (req: Request, res: Response) => {
+    try {
+        const rawToken = req.params.token;
+        const token = Array.isArray(rawToken) ? rawToken[0] : rawToken;
+        const { password } = req.body;
+
+        if (!token) {
+            res.status(400).json({ error: "Token is required" });
+            return;
+        }
+
+        if (!password) {
+            res.status(400).json({ error: "Password is required" });
+            return;
+        }
+
+        const secret = process.env.JWT_SECRET as string;
+        const payload: any = jwt.verify(token, secret);
+
+        // Fetch user by ID from token
+        const user = await getUserByIdServices(payload.userId);
+
+        if (!user) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(password, salt);
+
+        await updateUserPasswordService(user.email, hashedPassword);
+
+        res.status(200).json({ message: "Password has been reset successfully" });
+
+    } catch (error: any) {
+        res.status(500).json({ error: error.message || "Invalid or expired token" });
+    }
+};

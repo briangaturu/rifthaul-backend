@@ -1,0 +1,347 @@
+{
+  "id": "f5876ad6-28e2-418b-ae84-4066ccf915e5",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.shipmentTable": {
+      "name": "shipmentTable",
+      "schema": "",
+      "columns": {
+        "shipmentId": {
+          "name": "shipmentId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "businessId": {
+          "name": "businessId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transporterId": {
+          "name": "transporterId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "truckId": {
+          "name": "truckId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination": {
+          "name": "destination",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cargoType": {
+          "name": "cargoType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weightTonnes": {
+          "name": "weightTonnes",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "budget": {
+          "name": "budget",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pickupDate": {
+          "name": "pickupDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shipmentStatus": {
+          "name": "shipmentStatus",
+          "type": "shipmentStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'open'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "shipmentTable_businessId_userTable_userId_fk": {
+          "name": "shipmentTable_businessId_userTable_userId_fk",
+          "tableFrom": "shipmentTable",
+          "tableTo": "userTable",
+          "columnsFrom": [
+            "businessId"
+          ],
+          "columnsTo": [
+            "userId"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "shipmentTable_transporterId_userTable_userId_fk": {
+          "name": "shipmentTable_transporterId_userTable_userId_fk",
+          "tableFrom": "shipmentTable",
+          "tableTo": "userTable",
+          "columnsFrom": [
+            "transporterId"
+          ],
+          "columnsTo": [
+            "userId"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "shipmentTable_truckId_truckTable_truckId_fk": {
+          "name": "shipmentTable_truckId_truckTable_truckId_fk",
+          "tableFrom": "shipmentTable",
+          "tableTo": "truckTable",
+          "columnsFrom": [
+            "truckId"
+          ],
+          "columnsTo": [
+            "truckId"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.truckTable": {
+      "name": "truckTable",
+      "schema": "",
+      "columns": {
+        "truckId": {
+          "name": "truckId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "transporterId": {
+          "name": "transporterId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "truckType": {
+          "name": "truckType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plateNumber": {
+          "name": "plateNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capacityTonnes": {
+          "name": "capacityTonnes",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "truckStatus": {
+          "name": "truckStatus",
+          "type": "truckStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'available'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "truckTable_transporterId_userTable_userId_fk": {
+          "name": "truckTable_transporterId_userTable_userId_fk",
+          "tableFrom": "truckTable",
+          "tableTo": "userTable",
+          "columnsFrom": [
+            "transporterId"
+          ],
+          "columnsTo": [
+            "userId"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.userTable": {
+      "name": "userTable",
+      "schema": "",
+      "columns": {
+        "userId": {
+          "name": "userId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "fullName": {
+          "name": "fullName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "companyName": {
+          "name": "companyName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profileUrl": {
+          "name": "profileUrl",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'null'"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userType": {
+          "name": "userType",
+          "type": "userType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'business'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.userType": {
+      "name": "userType",
+      "schema": "public",
+      "values": [
+        "business",
+        "transporter",
+        "admin"
+      ]
+    },
+    "public.shipmentStatus": {
+      "name": "shipmentStatus",
+      "schema": "public",
+      "values": [
+        "open",
+        "accepted",
+        "in_transit",
+        "delivered",
+        "cancelled"
+      ]
+    },
+    "public.truckStatus": {
+      "name": "truckStatus",
+      "schema": "public",
+      "values": [
+        "available",
+        "on_job",
+        "inactive"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
